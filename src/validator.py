@@ -8,7 +8,7 @@ def validate_records(records: List[dict]) -> List[dict]:
         flags = []
         
         # Rule 1: Validate machine format (MC-XXX)
-        if not re.match(r"^MC-\d+$", str(row["machine_number"])):
+        if not re.match(r"^MC-\d+$", str(row["machine_number"]), re.IGNORECASE):
             flags.append("Invalid Machine Format")
             
         # Rule 2: Flag missing critical entries
