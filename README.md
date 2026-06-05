@@ -40,7 +40,6 @@ A web application prototype built for the BiztelAI Engineering Assignment that d
 
 ## Architecture & Workflows
 
-Below are the architectural diagrams outlining the system's design and workflows, incorporating our Test-Driven Development (TDD) and QA strategies at every layer. GitHub natively supports Mermaid diagrams, so these will render automatically.
 
 ### 1. System Architecture Diagram
 ```mermaid
