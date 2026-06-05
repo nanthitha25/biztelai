@@ -25,8 +25,20 @@ export async function GET() {
     totalRecords: db.prepare('SELECT COUNT(*) as count FROM records').get().count,
     recordsNeedingReview: db.prepare("SELECT COUNT(*) as count FROM records WHERE validationErrors != '[]' OR status = 'review'").get().count,
     shiftSummary,
-    machineSummary: db.prepare('SELECT machineNo, SUM(CAST(qtyProd AS NUMERIC)) as totalQty FROM records GROUP BY machineNo').all(),
   };
+
+  const rawMachineSummary = db.prepare('SELECT machineNo, SUM(CAST(qtyProd AS NUMERIC)) as totalQty FROM records GROUP BY machineNo').all();
+  const normalizedMachines = {};
+  rawMachineSummary.forEach(row => {
+    let machine = String(row.machineNo || '').toUpperCase().trim();
+    if (!machine) machine = 'Unknown';
+    normalizedMachines[machine] = (normalizedMachines[machine] || 0) + (row.totalQty || 0);
+  });
+  
+  stats.machineSummary = Object.keys(normalizedMachines).map(machineNo => ({
+    machineNo,
+    totalQty: normalizedMachines[machineNo]
+  }));
 
   return NextResponse.json(stats);
 }
