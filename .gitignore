@@ -39,3 +39,10 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Database
+biztel.db*
+
+# Uploads
+public/uploads/*
+!public/uploads/.gitkeep

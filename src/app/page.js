@@ -6,7 +6,7 @@ export default function Dashboard() {
   const [stats, setStats] = useState(null);
 
   useEffect(() => {
-    fetch('/api/dashboard')
+    fetch('/api/dashboard', { cache: 'no-store' })
       .then(res => res.json())
       .then(data => setStats(data))
       .catch(err => console.error("Error loading dashboard", err));

@@ -4,6 +4,7 @@ import { extractOperationalData } from '@/lib/extractor';
 import { validateRecords } from '@/lib/validation';
 import fs from 'fs/promises';
 import path from 'path';
+import crypto from 'crypto';
 
 export async function POST(request) {
   try {
