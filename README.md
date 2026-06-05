@@ -19,141 +19,203 @@ A web application prototype built for the BiztelAI Engineering Assignment that d
 
 ## Setup Instructions
 
-1. **Clone the repository**
-2. **Install dependencies**:
-   ```bash
-   npm install
-   ```
-3. **Set up Environment Variables**:
-   Create a `.env.local` file in the root directory and add your Gemini API Key:
-   ```bash
-   GEMINI_API_KEY=your_gemini_api_key_here
-   ```
-4. **Run the Development Server**:
-   ```bash
-   npm run dev
-   ```
-   Navigate to [http://localhost:3000](http://localhost:3000) to view the application. The SQLite database (`biztel.db`) will be automatically initialized on first run.
+1. Clone the repository
+2. Install dependencies:
+```bash
+npm install
+```
+3. Set up Environment Variables: 
+Create a `.env.local` file in the root directory and add your Gemini API Key:
+```bash
+GEMINI_API_KEY=your_gemini_api_key_here
+```
+4. Run the Development Server:
+```bash
+npm run dev
+```
+Navigate to [http://localhost:3000](http://localhost:3000) to view the application. The SQLite database (`biztel.db`) will be automatically initialized on first run.
 
 ---
 
 ## Architecture & Workflows
 
-Below are the architectural diagrams outlining the system's design and workflows. GitHub natively supports Mermaid diagrams, so these will render automatically.
+Below are the architectural diagrams outlining the system's design and workflows.
+
+### High-Level System Architecture
+```mermaid
+flowchart TD
+    Client[Web Browser Client] -->|Next.js App Router| Frontend[Next.js Frontend UI]
+    Frontend -->|API Requests| Backend[Next.js API Routes]
+    Backend -->|Read/Write| DB[(SQLite Database)]
+    Backend -->|Vision OCR Prompt| Gemini[Google Gemini 2.5 Flash API]
+    Backend -->|Business Rules| Validation[Validation Engine]
+    
+    style Client fill:#1e293b,stroke:#38bdf8,stroke-width:2px,color:#fff
+    style Frontend fill:#1e293b,stroke:#38bdf8,stroke-width:2px,color:#fff
+    style Backend fill:#1e293b,stroke:#3b82f6,stroke-width:2px,color:#fff
+    style DB fill:#1e293b,stroke:#8b5cf6,stroke-width:2px,color:#fff
+    style Gemini fill:#1e293b,stroke:#f59e0b,stroke-width:2px,color:#fff
+    style Validation fill:#1e293b,stroke:#10b981,stroke-width:2px,color:#fff
+```
 
 ### 1. Use Case Diagram
 ```mermaid
-flowchart LR
-    User([User])
-    Upload((Upload Document))
-    Review((Review Extracted Data))
-    Edit((Edit Data manually))
-    Dashboard((View Analytics Dashboard))
-    Search((Search/Filter Records))
+usecaseDiagram
+    actor "Factory Operator" as operator
+    actor "Google Gemini API" as gemini
     
-    User --> Upload
-    User --> Review
-    User --> Edit
-    User --> Dashboard
-    User --> Search
+    rectangle "BiztelAI System" {
+        usecase "Upload Shop-Floor Log" as UC1
+        usecase "Review Extracted Records" as UC2
+        usecase "Manually Edit/Correct Fields" as UC3
+        usecase "View Operational Dashboard" as UC4
+        usecase "Process Vision OCR & Confidence" as UC5
+    }
+    
+    operator --> UC1
+    operator --> UC2
+    operator --> UC3
+    operator --> UC4
+    
+    UC1 ..> UC5 : <<include>>
+    UC5 --> gemini
 ```
 
 ### 2. Entity Relationship Diagram (ERD)
 ```mermaid
 erDiagram
-    DOCUMENT {
+    DOCUMENTS {
         string id PK
-        string filename
-        string originalImageUrl
-        datetime uploadedAt
+        string file_path
+        timestamp uploaded_at
         string status
     }
-    RECORD {
-        string id PK
-        string documentId FK
-        string date
-        int shift
-        string empNo
-        string opnCode
-        string machineNo
-        string workOrderNo
-        int qtyProd
-        float timeTaken
-        string confidenceData
-        string validationErrors
-        string status
+    OPERATIONAL_RECORDS {
+        int id PK
+        string document_id FK
+        int sequence_number
+        string log_date
+        string shift
+        string employee_num
+        string operation_code
+        string machine_num
+        string work_order_num
+        int quantity_produced
+        float confidence_score
+        string validation_status
     }
-    DOCUMENT ||--o{ RECORD : "contains"
+    DOCUMENTS ||--o{ OPERATIONAL_RECORDS : "contains"
 ```
 
-### 3. Sequence Diagram (Extraction Workflow)
+### 3. Sequence Diagrams
+
+#### A. Document Upload & Extraction Workflow (UC1 & UC5)
 ```mermaid
 sequenceDiagram
-    actor User
-    participant UI as Frontend
-    participant API as Next.js API
-    participant AI as Gemini API
+    autonumber
+    actor Operator as Factory Operator
+    participant UI as Next.js Frontend
+    participant API as Next.js Route Handler
+    participant DB as SQLite DB
+    participant Gemini as Gemini 2.5 Vision API
+
+    Operator->>UI: Upload handwritten image log
+    UI->>API: POST /api/upload (FormData)
+    API->>DB: Initialize Document Record (Status: Pending)
+    API->>Gemini: Pass image bytes + Structured Extraction Prompt
+    Gemini-->>API: Return Structured JSON (Fields + Confidence Scores)
+    API->>API: Execute Business Validation Rules
+    API->>DB: Save extracted rows & validation flags
+    API-->>UI: Return parsed data payload
+    UI-->>Operator: Render side-by-side editable data grid
+```
+
+#### B. Manual Review & Editing Workflow (UC2 & UC3)
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Operator as Factory Operator
+    participant UI as Next.js Frontend
+    participant API as Next.js Route Handler
     participant DB as SQLite DB
 
-    User->>UI: Uploads Image/PDF
-    UI->>API: POST /api/upload
-    API->>AI: Send image for OCR processing
-    AI-->>API: Return structured JSON data & confidence scores
-    API->>API: Run Validation Logic
-    API->>DB: Save Document & extracted Records
-    API-->>UI: Return extracted data
-    UI-->>User: Display Review UI (Split-screen)
-    User->>UI: Edits invalid/low-confidence fields
-    UI->>API: PUT /api/records
-    API->>DB: Update records
-    API-->>UI: Success
+    Operator->>UI: View Extracted Records (Split-Screen)
+    UI->>Operator: Highlight Low Confidence & Validation Errors
+    Operator->>UI: Modify cell data (e.g. fix quantity)
+    UI->>API: PUT /api/records (Updated Data)
+    API->>API: Re-run Business Validation Rules
+    API->>DB: Update Record & clear validation errors if fixed
+    API-->>UI: Return Success
+    UI-->>Operator: Display "Saved" badge
+```
+
+#### C. Dashboard Analytics Workflow (UC4)
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Operator as Factory Operator
+    participant UI as Next.js Frontend
+    participant API as Next.js Route Handler
+    participant DB as SQLite DB
+
+    Operator->>UI: Navigate to Dashboard
+    UI->>API: GET /api/dashboard
+    API->>DB: Query Aggregated Metrics (Uploads, Shifts, Output)
+    DB-->>API: Return counts and grouped metrics
+    API-->>UI: Return Dashboard Stats JSON
+    UI-->>Operator: Render Metrics Cards & Analytics Tables
 ```
 
 ### 4. Class Diagram (Core Services)
 ```mermaid
 classDiagram
-    class DocumentManager {
-        +uploadDocument(file)
-        +getDocuments()
-        +getDocumentById(id)
+    class DocumentController {
+        +uploadDocument(req)
+        +getDocumentLogs(id)
     }
-    class AIProcessor {
-        +extractData(imageBuffer)
-        -buildPrompt()
-        -parseResponse()
+    class ExtractionService {
+        +convertImageToJSON(imageBuffer)
+        -buildExtractionPrompt()
     }
     class ValidationEngine {
-        +validateRecord(record)
-        -checkShift(shift)
-        -checkEmployeeFormat(empNo)
+        +validateRow(rowData)
+        -checkShiftValue(shift)
         -checkQuantity(qty)
     }
-    class RecordRepository {
-        +saveRecords(records)
-        +updateRecord(id, data)
-        +getRecordsByDocument(docId)
-        +getAnalytics()
+    class DatabaseClient {
+        +saveDocument(docData)
+        +saveExtractedRows(rows)
+        +getDashboardMetrics()
     }
-    DocumentManager --> AIProcessor : uses
-    DocumentManager --> RecordRepository : uses
-    AIProcessor --> ValidationEngine : uses
+
+    DocumentController --> ExtractionService : orchestrates
+    ExtractionService --> ValidationEngine : passes data to
+    DocumentController --> DatabaseClient : persists via
 ```
 
 ### 5. Activity Diagram
 ```mermaid
 stateDiagram-v2
-    [*] --> Upload_Document
-    Upload_Document --> AI_Processing
-    AI_Processing --> Validation_Check
-    Validation_Check --> Review_Queue
-    Review_Queue --> User_Review
+    [*] --> ImageUploaded : Operator Uploads Form
+    ImageUploaded --> Processing : Sent to Gemini Vision API
     
-    state User_Review {
-        [*] --> Check_Fields
-        Check_Fields --> Edit_Data : Found Errors/Low Confidence
-        Edit_Data --> Check_Fields
+    state Processing {
+        [*] --> ExtractingText
+        ExtractingText --> AssigningConfidenceScores
+        AssigningConfidenceScores --> ApplicationValidation
     }
     
-    User_Review --> Save_Final_Data : User Approves
-    Save_Final_Data --> [*]
+    Processing --> ReviewQueue : Processing Complete
+    
+    state ReviewQueue {
+        [*] --> CheckFlags
+        CheckFlags --> HighlightWarnings : High Uncertainty / Validation Failure Found
+        CheckFlags --> StandardDisplay : Clean Extracted Row
+        HighlightWarnings --> ManualCorrection : Operator Edits Grid
+        StandardDisplay --> ManualCorrection : Optional Operator Edit
+        ManualCorrection --> Saved : Operator Clicks "Save Record"
+    }
+    
+    ReviewQueue --> DashboardUpdated : Commit to SQLite
+    DashboardUpdated --> [*]
 ```
