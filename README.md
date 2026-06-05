@@ -93,8 +93,8 @@ flowchart LR
     User --> Search
     
     Tester -.-> Test
-    Test -.-> Upload : verifies
-    Test -.-> Review : validates
+    Test -.->|verifies| Upload
+    Test -.->|validates| Review
 ```
 
 ### 3. Entity Relationship Diagram (ERD)
