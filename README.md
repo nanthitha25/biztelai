@@ -44,33 +44,16 @@ Below are the architectural diagrams outlining the system's design and workflows
 
 ### 1. System Architecture Diagram
 ```mermaid
-flowchart TD
-    subgraph Client
-        UI[Next.js React Frontend]
-    end
-    subgraph Server
-        API[Next.js API Routes]
-        Val[Validation Engine]
-    end
-    subgraph External
-        AI[Gemini 2.5 Vision API]
-    end
-    subgraph Data
-        DB[(SQLite Database)]
-    end
-    subgraph Testing
-        Jest[Jest / TDD Suite]
-        Playwright[E2E Testing]
-    end
+graph TD
+    User([Factory Operator]) --> |Interacts with| Frontend[Next.js 15 App Router]
+    Frontend --> |HTTP Requests| API[Next.js API Routes]
+    API --> |Vision OCR Prompt| Gemini[Google Gemini 2.5 Flash]
+    API --> |Read / Write| DB[(SQLite: biztel.db)]
     
-    UI -->|HTTP Requests| API
-    API -->|Prompt & Image| AI
-    AI -->|JSON Data| API
-    API -->|Validates| Val
-    Val -->|Reads/Writes| DB
-    Jest -.->|Unit Tests| Val
-    Jest -.->|Unit Tests| API
-    Playwright -.->|UI Tests| UI
+    subgraph Testing Suite
+        TDD[Jest & React Testing Library] -.-> |Component Tests| Frontend
+        TDD -.-> |Unit Tests & Validation Mocks| API
+    end
 ```
 
 ### 2. Use Case Diagram
@@ -93,8 +76,8 @@ flowchart LR
     User --> Search
     
     Tester -.-> Test
-    Test -.->|verifies| Upload
-    Test -.->|validates| Review
+    Test -.-> Upload : verifies
+    Test -.-> Review : validates
 ```
 
 ### 3. Entity Relationship Diagram (ERD)
@@ -137,56 +120,60 @@ erDiagram
 #### A. Upload & Extraction Workflow (With TDD Mocks)
 ```mermaid
 sequenceDiagram
-    actor User
-    participant UI as Frontend
+    autonumber
+    actor Operator as Factory Operator
+    participant UI as Next.js Frontend
     participant API as Next.js API
-    participant AI as Gemini API
-    participant Test as Jest Unit Tests
+    participant Validation as Validation Engine
     participant DB as SQLite DB
+    participant Gemini as Gemini 2.5 Vision API
+    participant Tests as Jest Test Suite
 
-    Test->>API: Execute TDD Mock: POST /api/upload
-    User->>UI: Uploads Image/PDF
-    UI->>API: POST /api/upload
-    API->>AI: Send image for OCR processing
-    AI-->>API: Return structured JSON data
-    API->>Test: Assert Validation Logic Engine
-    API->>DB: Save Document & extracted Records
-    API-->>UI: Return extracted data
+    Tests-->>Validation: 0. Run automated unit tests on edge cases (Green)
+    Operator->>UI: 1. Upload handwritten image log
+    UI->>API: 2. POST /api/upload
+    API->>Gemini: 3. Pass image bytes + extraction schema
+    Gemini-->>API: 4. Return JSON (Fields + Confidence Scores)
+    API->>Validation: 5. Execute business rules (Bypass empty rows)
+    Validation-->>API: 6. Return flags & sanitised data
+    API->>DB: 7. Save extracted rows & validation status
+    API-->>UI: 8. Return parsed payload
+    UI-->>Operator: 9. Render editable data grid
 ```
 
 #### B. Review & Edit Workflow
 ```mermaid
 sequenceDiagram
-    actor User
-    participant UI as Frontend
+    autonumber
+    actor Operator as Factory Operator
+    participant UI as Next.js Frontend
     participant API as Next.js API
     participant DB as SQLite DB
-    participant Test as E2E Testing
 
-    Test->>UI: Assert UI components render correctly
-    User->>UI: Edits invalid/low-confidence fields
-    User->>UI: Clicks Save Record
-    UI->>API: PUT /api/records
-    API->>API: Re-run strict validation logic
-    API->>DB: Update record & clear flags
-    DB-->>API: Success
-    API-->>UI: Row marked as verified
+    Operator->>UI: 1. Reviews highlighted validation error (e.g., Missing Qty)
+    Operator->>UI: 2. Inputs corrected data & clicks "Save"
+    UI->>API: 3. PUT /api/records/{id}
+    API->>DB: 4. Update row data & clear error flags
+    DB-->>API: 5. Confirm successful update
+    API-->>UI: 6. Return success status (200 OK)
+    UI-->>Operator: 7. Row turns green / Removes warning UI
 ```
 
 #### C. View Operational Dashboard Workflow
 ```mermaid
 sequenceDiagram
-    actor User
-    participant UI as Frontend
+    autonumber
+    actor Manager as Factory Manager
+    participant UI as Dashboard UI
     participant API as Next.js API
     participant DB as SQLite DB
 
-    User->>UI: Navigates to Dashboard
-    UI->>API: GET /api/dashboard
-    API->>DB: Execute Aggregate SQL Queries (SUM, COUNT)
-    DB-->>API: Return dashboard statistics
-    API-->>UI: JSON response mapping
-    UI-->>User: Render interactive Charts & Tables
+    Manager->>UI: 1. Navigate to /dashboard
+    UI->>API: 2. GET /api/analytics
+    API->>DB: 3. Query Total Uploads, Failures, and Summaries
+    DB-->>API: 4. Return aggregated operational dataset
+    API-->>UI: 5. Return JSON metrics payload
+    UI-->>Manager: 6. Render KPI cards and shift/machine charts
 ```
 
 ### 5. Class Diagram (Core Services)
