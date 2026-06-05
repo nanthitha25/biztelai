@@ -1,27 +1,19 @@
-# AI Native Development Workflow Log — BiztelAI IDP
+# AI-Assisted Engineering Workflow
 
-This document outlines how AI-assisted engineering workflows were leveraged to build, iterate, and deploy this Intelligent Document Processing prototype within the 48-hour timeline.
+## Tools Used
+- **Antigravity (Autonomous Coding Agent)**: Used as the primary autonomous developer to scaffold, brainstorm, and write the full-stack code.
+- **Google Gemini API (gemini-2.5-flash)**: Used as the core Vision OCR engine within the application to digitize the handwritten operational documents.
 
-## 🛠️ AI Tooling Stack
-- **Development Environment:** Cursor IDE (Using Claude 3.5 Sonnet & GPT-4o models)
-- **Infrastructure Core:** Google Gemini 2.5 API (Vision & Structured JSON Schemas)
-- **Interface Acceleration:** Streamlit Framework
+## How AI Was Used During Development
+1. **Brainstorming & Architecture Planning**: The AI agent drafted an implementation plan with UML sequence/class diagrams (Mermaid) to visualize the data flow before coding.
+2. **Scaffolding**: The agent used Next.js CLI to bootstrap the project and installed necessary dependencies natively.
+3. **Full-Stack Implementation**: The agent wrote the SQLite DB schema, API routes, and React components simultaneously, ensuring the validation rules and confidence scoring logic connected perfectly.
+4. **Prompt Engineering for OCR**: The agent crafted a precise zero-shot prompt for Gemini 2.5 Flash, instructing it to return a structured JSON array and self-evaluate its confidence for each field.
 
-## 📈 Engineering Acceleration Metrics
-- **Total Build Time:** ~3.5 Hours from assignment receipt to live deployment.
-- **AI Leverage Ratio:** Roughly 80% of scaffolding and boilerplate logic was generated via prompt-driven architecture; 20% involved manual overrides for state synchronization and data pipeline integration.
+## Areas Where AI Helped Most
+- **Rapid Prototyping**: Setting up the full-stack architecture (Next.js App Router + SQLite) and writing all the CRUD API routes in a matter of minutes.
+- **UI/UX Generation**: Generating a complete "Glassmorphism" dark mode CSS theme with custom variables, and scaffolding the split-screen review interface without needing manual CSS tinkering.
 
-## 🧠 Prompts and Debugging Iterations
-### 1. Structural Vision Extraction Prompting
-When extracting messy, handwritten manufacturing sheets, traditional layout parsing algorithms struggle with cross-outs and formatting variations. I engineered a precise system role profile:
-> *"You are an industrial data validation engine scanning handwritten factory sheets. Reconstruct structural layout cells into an atomic JSON list schema. Translate Roman numeral shift symbols (I, II, III) seamlessly into core computer-readable integers (1, 2, 3)."*
-
-### 2. Overcoming Streamlit State Synchronization Loops
-During early prototyping, changing a value in the `st.data_editor()` component caused the component to clear out the active extraction cache during the execution rerun. 
-- **AI Assistance:** Prompted the conversational chat assistant to fix the component context: *"Streamlit data editor resets on state alteration. How do I decouple user session states?"*
-- **Resolution:** The AI generated an elegant pattern using `st.session_state.active_batch`, allowing the dataframe cache to persist correctly across manual corrections.
-
-## ⚠️ Areas Requiring Human Intervention
-While the AI brilliantly handled formatting structures and schema definitions, human-in-the-loop decisions were essential for:
-1. **Edge Case Validation Rules:** Tailoring the exact business thresholds for what defines a manufacturing "anomaly" (e.g., catching blank dashes `—` and converting them to explicit application-layer `None` types).
-2. **Local Deployment Asset Pipelines:** Debugging host-system binary requirements for `pdf2image` and managing local path environments for the database persistence tracking layers.
+## Areas Requiring Manual Intervention
+- **Environment Setup**: The user must manually provide the `GEMINI_API_KEY` in their shell or `.env.local` file to authenticate the Vision OCR model.
+- **Deployment**: The user will handle deploying this prototype to a free-tier hosting platform (like Vercel) and uploading the demo video as required by the assignment.
