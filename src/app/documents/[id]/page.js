@@ -104,9 +104,18 @@ export default function ReviewPage({ params }) {
                   errors = [String(record.validationErrors)];
                 }
                 const hasErrors = errors.length > 0;
+                const isRecordEmpty = 
+                  !String(record.date || '').trim() &&
+                  !String(record.shift || '').trim() &&
+                  !String(record.empNo || '').trim() &&
+                  !String(record.opnCode || '').trim() &&
+                  !String(record.machineNo || '').trim() &&
+                  !String(record.workOrderNo || '').trim() &&
+                  !String(record.qtyProd || '').trim() &&
+                  !String(record.timeTaken || '').trim();
 
                 return (
-                  <tr key={record.id} style={{ height: '64px', borderBottom: '1px solid var(--border-color)', backgroundColor: hasErrors ? 'rgba(239, 68, 68, 0.05)' : 'transparent' }}>
+                  <tr key={record.id} style={{ borderBottom: '1px solid var(--border-color)', backgroundColor: hasErrors ? 'rgba(239, 68, 68, 0.05)' : 'transparent' }}>
                     <td style={{ padding: '0.5rem' }}>
                       <input value={record.sequenceNo || ''} onChange={(e) => handleChange(record.id, 'sequenceNo', e.target.value)} style={inputStyle(conf.sequenceNo, hasErrors)} />
                     </td>
@@ -155,7 +164,7 @@ export default function ReviewPage({ params }) {
                           {hasErrors ? <AlertTriangle size={14} /> : <Check size={14} />}
                           Save
                         </button>
-                        {hasErrors && (
+                        {hasErrors && !isRecordEmpty && (
                           <div style={{ fontSize: '0.75rem', color: 'var(--error-color)', maxWidth: '150px', whiteSpace: 'normal' }}>
                             {errors.map((err, i) => <div key={i}>• {err}</div>)}
                           </div>
