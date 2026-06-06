@@ -29,24 +29,37 @@ export async function PUT(request) {
 
     const db = getDb();
     const updateStmt = db.prepare(`
-      UPDATE records 
-      SET date = ?, shift = ?, empNo = ?, opnCode = ?, machineNo = ?, 
-          workOrderNo = ?, qtyProd = ?, timeTaken = ?, validationErrors = ?, status = ?
-      WHERE id = ?
+      INSERT INTO records (
+        id, documentId, sequenceNo, date, shift, empNo, opnCode, machineNo, 
+        workOrderNo, qtyProd, timeTaken, validationErrors, status
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      ON CONFLICT(id) DO UPDATE SET
+        date = excluded.date,
+        shift = excluded.shift,
+        empNo = excluded.empNo,
+        opnCode = excluded.opnCode,
+        machineNo = excluded.machineNo,
+        workOrderNo = excluded.workOrderNo,
+        qtyProd = excluded.qtyProd,
+        timeTaken = excluded.timeTaken,
+        validationErrors = excluded.validationErrors,
+        status = excluded.status
     `);
 
     updateStmt.run(
-      validated.date,
-      validated.shift,
-      validated.empNo,
-      validated.opnCode,
-      validated.machineNo,
-      validated.workOrderNo,
-      validated.qtyProd,
-      validated.timeTaken,
+      id,
+      validated.documentId,
+      String(validated.sequenceNo || ''),
+      String(validated.date || ''),
+      String(validated.shift || ''),
+      String(validated.empNo || ''),
+      String(validated.opnCode || ''),
+      String(validated.machineNo || ''),
+      String(validated.workOrderNo || ''),
+      String(validated.qtyProd || ''),
+      String(validated.timeTaken || ''),
       JSON.stringify(validated.validationErrors),
-      validated.validationErrors.length === 0 ? 'approved' : 'review',
-      id
+      validated.validationErrors.length === 0 ? 'approved' : 'review'
     );
 
     return NextResponse.json({ success: true, record: validated });

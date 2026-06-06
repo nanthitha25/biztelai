@@ -21,11 +21,44 @@ export default function ReviewPage({ params }) {
     // Fetch records
     fetch(`/api/records?documentId=${id}`)
       .then(res => res.json())
-      .then(data => setRecords(data));
+      .then(data => {
+        const activeRecords = data.filter(r => {
+          return !(!String(r.date || '').trim() &&
+                   !String(r.shift || '').trim() &&
+                   !String(r.empNo || '').trim() &&
+                   !String(r.opnCode || '').trim() &&
+                   !String(r.machineNo || '').trim() &&
+                   !String(r.workOrderNo || '').trim() &&
+                   !String(r.qtyProd || '').trim() &&
+                   !String(r.timeTaken || '').trim());
+        });
+        setRecords(activeRecords);
+      });
   }, [id]);
 
   const handleChange = (recordId, field, value) => {
     setRecords(records.map(r => r.id === recordId ? { ...r, [field]: value } : r));
+  };
+
+  const handleAddRow = () => {
+    const nextSeq = records.length > 0 ? Math.max(...records.map(r => Number(r.sequenceNo) || 0)) + 1 : 1;
+    const newRecord = {
+      id: crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).substring(2),
+      documentId: id,
+      sequenceNo: String(nextSeq),
+      date: '',
+      shift: '',
+      empNo: '',
+      opnCode: '',
+      machineNo: '',
+      workOrderNo: '',
+      qtyProd: '',
+      timeTaken: '',
+      confidenceData: '{}',
+      validationErrors: [],
+      status: 'review'
+    };
+    setRecords([...records, newRecord]);
   };
 
   const handleSave = async (record) => {
@@ -67,10 +100,11 @@ export default function ReviewPage({ params }) {
           Extracted Data Review
         </div>
         <div style={{ flex: 1, overflowX: 'auto', overflowY: 'auto' }}>
-          <table style={{ minWidth: '900px', width: '100%', borderCollapse: 'collapse', fontSize: '0.875rem' }}>
+          <table style={{ minWidth: '950px', width: '100%', borderCollapse: 'collapse', fontSize: '0.875rem' }}>
             <thead>
               <tr style={{ backgroundColor: 'var(--bg-tertiary)', color: 'var(--text-secondary)' }}>
                 {[
+                  { label: 'Seq', width: '50px' },
                   { label: 'Date', width: '100px' },
                   { label: 'Shift', width: '70px' },
                   { label: 'Emp No', width: '100px' },
@@ -115,6 +149,9 @@ export default function ReviewPage({ params }) {
 
                 return (
                   <tr key={record.id} style={{ borderBottom: '1px solid var(--border-color)', backgroundColor: hasErrors ? 'rgba(239, 68, 68, 0.05)' : 'transparent' }}>
+                    <td style={{ padding: '0.5rem' }}>
+                      <input value={record.sequenceNo || ''} onChange={(e) => handleChange(record.id, 'sequenceNo', e.target.value)} style={inputStyle(conf.sequenceNo, hasErrors)} />
+                    </td>
                     <td style={{ padding: '0.5rem' }}>
                       <input value={record.date || ''} onChange={(e) => handleChange(record.id, 'date', e.target.value)} style={inputStyle(conf.date, hasErrors)} />
                     </td>
@@ -170,6 +207,27 @@ export default function ReviewPage({ params }) {
                   </tr>
                 );
               })}
+              <tr>
+                <td colSpan="10" style={{ padding: '1rem', textAlign: 'center' }}>
+                  <button 
+                    onClick={handleAddRow}
+                    style={{
+                      background: 'rgba(59, 130, 246, 0.15)',
+                      color: 'var(--accent-blue)',
+                      border: '1px dashed var(--accent-blue)',
+                      padding: '0.5rem 1.5rem',
+                      borderRadius: 'var(--radius-md)',
+                      fontWeight: 500,
+                      cursor: 'pointer',
+                      transition: 'all 0.2s',
+                    }}
+                    onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(59, 130, 246, 0.25)'}
+                    onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(59, 130, 246, 0.15)'}
+                  >
+                    + Add Row Manually
+                  </button>
+                </td>
+              </tr>
             </tbody>
           </table>
         </div>
