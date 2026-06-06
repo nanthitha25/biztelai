@@ -53,7 +53,7 @@ graph TB
 
     %% Client / Presentation Layer
     subgraph Client [Presentation Layer - Next.js React UI]
-        Operator([Factory Operator])
+        User
         UploadView[Document Upload & Preview]
         ReviewGrid[Split-Screen Review Grid]
         DashboardView[Analytics Dashboard & KPIs]
