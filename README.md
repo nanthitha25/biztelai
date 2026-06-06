@@ -52,7 +52,7 @@ graph TB
     classDef val fill:#fff3e0,stroke:#f57c00,stroke-width:2px,color:#e65100;
 
     %% Client / Presentation Layer
-    subgraph Client [Presentation Layer - Next.js React UI]
+    subgraph Client [Presentation Layer - biztelAi  UI]
         User
         UploadView[Document Upload & Preview]
         ReviewGrid[Split-Screen Review Grid]
