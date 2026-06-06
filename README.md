@@ -82,7 +82,7 @@ graph TB
     end
 
     %% Connections & Flow
-    Operator -->|1. Uploads Image/PDF| UploadView
+    User -->|1. Uploads Image/PDF| UploadView
     UploadView -->|2. Form Data File| UploadAPI
     UploadAPI -->|3. Save File| UploadsFolder
     UploadAPI -->|4. Send Image Bytes + Schema| Gemini
@@ -102,7 +102,7 @@ graph TB
     AnalyticsAPI -->|13. Aggregated SQL Queries| SQLite
 
     %% Apply Classes
-    class Operator,UploadView,ReviewGrid,DashboardView client;
+    class User,UploadView,ReviewGrid,DashboardView client;
     class UploadAPI,RecordsAPI,AnalyticsAPI,Parser server;
     class Gemini,SysPrompt ai;
     class SQLite,UploadsFolder db;
