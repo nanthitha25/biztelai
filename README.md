@@ -60,7 +60,7 @@ graph TB
     end
 
     %% Application Server
-    subgraph Backend [Application Server - Next.js API Routes]
+    subgraph Backend [Application Server - biztelai API Routes]
         UploadAPI[Upload API Router<br>POST /api/upload]
         RecordsAPI[Records API Router<br>GET/PUT /api/records]
         AnalyticsAPI[Analytics API Router<br>GET /api/dashboard]
