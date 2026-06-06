@@ -43,16 +43,71 @@ A web application prototype built for the BiztelAI Engineering Assignment that d
 
 ### 1. System Architecture Diagram
 ```mermaid
-graph TD
-    User([Factory Operator]) --> |Interacts with| Frontend[Next.js 15 App Router]
-    Frontend --> |HTTP Requests| API[Next.js API Routes]
-    API --> |Vision OCR Prompt| Gemini[Google Gemini 2.5 Flash]
-    API --> |Read / Write| DB[(SQLite: biztel.db)]
-    
-    subgraph Testing Suite
-        TDD[Jest & React Testing Library] -.-> |Component Tests| Frontend
-        TDD -.-> |Unit Tests & Validation Mocks| API
+graph TB
+    %% Styling definitions
+    classDef client fill:#e1f5fe,stroke:#0288d1,stroke-width:2px,color:#01579b;
+    classDef server fill:#efebe9,stroke:#5d4037,stroke-width:2px,color:#3e2723;
+    classDef ai fill:#ede7f6,stroke:#5e35b1,stroke-width:2px,color:#4a148c;
+    classDef db fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px,color:#1b5e20;
+    classDef val fill:#fff3e0,stroke:#f57c00,stroke-width:2px,color:#e65100;
+
+    %% Client / Presentation Layer
+    subgraph Client [Presentation Layer - Next.js React UI]
+        Operator([Factory Operator])
+        UploadView[Document Upload & Preview]
+        ReviewGrid[Split-Screen Review Grid]
+        DashboardView[Analytics Dashboard & KPIs]
     end
+
+    %% Application Server
+    subgraph Backend [Application Server - Next.js API Routes]
+        UploadAPI[Upload API Router<br>POST /api/upload]
+        RecordsAPI[Records API Router<br>GET/PUT /api/records]
+        AnalyticsAPI[Analytics API Router<br>GET /api/dashboard]
+        
+        Parser[Gemini Response Parser]
+        ValEngine[Validation & Business Rules Engine]
+    end
+
+    %% AI / LLM Processing
+    subgraph AI [AI & OCR Processing]
+        Gemini[Google Gemini 2.5 Flash Vision]
+        SysPrompt[Structured Schema Prompt<br>& Confidence Scoring]
+    end
+
+    %% Data Storage
+    subgraph Storage [Persistence Layer]
+        SQLite[(SQLite Database: biztel.db)]
+        UploadsFolder[(Local Storage: public/uploads/)]
+    end
+
+    %% Connections & Flow
+    Operator -->|1. Uploads Image/PDF| UploadView
+    UploadView -->|2. Form Data File| UploadAPI
+    UploadAPI -->|3. Save File| UploadsFolder
+    UploadAPI -->|4. Send Image Bytes + Schema| Gemini
+    Gemini -.->|Processes OCR & Layout| SysPrompt
+    SysPrompt -.->|5. Return Structured JSON| Gemini
+    Gemini -->|6. Extracted Data + Confidence| Parser
+    
+    Parser -->|7. Send Raw Extracted Fields| ValEngine
+    ValEngine -->|8. Evaluate Business Rules<br>& Flag Warnings| RecordsAPI
+    
+    RecordsAPI -->|9. Write Document & Records| SQLite
+    RecordsAPI -->|10. Return Extracted Payload| ReviewGrid
+    
+    ReviewGrid -->|11. Correct & Save| RecordsAPI
+    
+    DashboardView -->|12. Fetch Metrics| AnalyticsAPI
+    AnalyticsAPI -->|13. Aggregated SQL Queries| SQLite
+
+    %% Apply Classes
+    class Operator,UploadView,ReviewGrid,DashboardView client;
+    class UploadAPI,RecordsAPI,AnalyticsAPI,Parser server;
+    class Gemini,SysPrompt ai;
+    class SQLite,UploadsFolder db;
+    class ValEngine val;
+
 ```
 
 ### 2. Use Case Diagram
