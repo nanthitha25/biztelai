@@ -2,23 +2,6 @@ export function validateRecords(records) {
   return records.map(record => {
     const errors = [];
     
-    const isRowCompletelyEmpty = 
-      !String(record.date || '').trim() && 
-      !String(record.shift || '').trim() && 
-      !String(record.empNo || '').trim() && 
-      !String(record.opnCode || '').trim() && 
-      !String(record.machineNo || '').trim() && 
-      !String(record.workOrderNo || '').trim() &&
-      !String(record.qtyProd || '').trim() &&
-      !String(record.timeTaken || '').trim();
-
-    if (isRowCompletelyEmpty) {
-      return {
-        ...record,
-        validationErrors: []
-      };
-    }
-
     // Shift validation
     const shift = String(record.shift || '').trim();
     if (shift && !['1', '2', '3', 'I', 'II', 'III'].includes(shift)) {

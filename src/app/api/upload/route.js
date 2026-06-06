@@ -49,8 +49,8 @@ export async function POST(request) {
       const insertRec = db.prepare(`
         INSERT INTO records (
           id, documentId, sequenceNo, date, shift, empNo, opnCode, 
-          machineNo, workOrderNo, qtyProd, timeTaken, confidenceData, validationErrors
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+          machineNo, workOrderNo, qtyProd, timeTaken, confidenceData, validationErrors, status
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `);
 
       for (const record of validatedRecords) {
@@ -67,7 +67,8 @@ export async function POST(request) {
           String(record.qtyProd || ''),
           String(record.timeTaken || ''),
           JSON.stringify(record.confidence || {}),
-          JSON.stringify(record.validationErrors || [])
+          JSON.stringify(record.validationErrors || []),
+          record.validationErrors.length === 0 ? 'approved' : 'review'
         );
       }
     });
