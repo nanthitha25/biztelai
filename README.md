@@ -113,7 +113,7 @@ graph TB
 ### 2. Use Case Diagram
 ```mermaid
 flowchart LR
-    User([Factory Operator])
+    User([USER])
     Tester([QA / Automated TDD Suite])
     
     Upload((Upload Document))
