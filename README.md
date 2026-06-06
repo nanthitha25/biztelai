@@ -176,10 +176,10 @@ erDiagram
 sequenceDiagram
     autonumber
     actor Operator as Factory Operator
-    participant UI as Next.js Frontend
-    participant API as Next.js API
+    participant UI as biztelai Frontend
+    participant API as biztelai API
     participant Validation as Validation Engine
-    participant DB as SQLite DB
+    participant  biztelaiDB
     participant Gemini as Gemini 2.5 Vision API
     participant Tests as Jest Test Suite
 
@@ -199,10 +199,10 @@ sequenceDiagram
 ```mermaid
 sequenceDiagram
     autonumber
-    actor Operator as Factory Operator
-    participant UI as Next.js Frontend
-    participant API as Next.js API
-    participant DB as SQLite DB
+    actor Operator as User
+    participant UI as biztelai Frontend
+    participant API as biztelai API
+    participant DB as biztelai DB
 
     Operator->>UI: 1. Reviews highlighted validation error (e.g., Missing Qty)
     Operator->>UI: 2. Inputs corrected data & clicks "Save"
@@ -217,10 +217,10 @@ sequenceDiagram
 ```mermaid
 sequenceDiagram
     autonumber
-    actor Manager as Factory Manager
+    actor Manager as User
     participant UI as Dashboard UI
-    participant API as Next.js API
-    participant DB as SQLite DB
+    participant API as biztelai API
+    participant DB as biztelai
 
     Manager->>UI: 1. Navigate to /dashboard
     UI->>API: 2. GET /api/analytics
