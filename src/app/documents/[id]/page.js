@@ -49,10 +49,10 @@ export default function ReviewPage({ params }) {
   if (!document) return <div style={{ color: 'var(--text-secondary)' }}>Loading...</div>;
 
   return (
-    <div style={{ display: 'flex', gap: '2rem', height: 'calc(100vh - 5rem)', overflow: 'hidden' }}>
+    <div style={{ display: 'flex', gap: '1.5rem', height: 'calc(100vh - 5rem)', overflow: 'hidden' }}>
       
       {/* Left Pane - Image Preview */}
-      <div style={{ flex: 1, backgroundColor: 'var(--bg-secondary)', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+      <div style={{ flex: '1 1 40%', minWidth: '350px', backgroundColor: 'var(--bg-secondary)', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
         <div style={{ padding: '1rem', borderBottom: '1px solid var(--border-color)', fontWeight: 600 }}>
           Original Document
         </div>
@@ -62,16 +62,27 @@ export default function ReviewPage({ params }) {
       </div>
 
       {/* Right Pane - Data Grid */}
-      <div style={{ flex: 1, backgroundColor: 'var(--bg-secondary)', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+      <div style={{ flex: '1 1 60%', minWidth: '550px', backgroundColor: 'var(--bg-secondary)', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
         <div style={{ padding: '1rem', borderBottom: '1px solid var(--border-color)', fontWeight: 600 }}>
           Extracted Data Review
         </div>
         <div style={{ flex: 1, overflowX: 'auto', overflowY: 'auto' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.875rem' }}>
+          <table style={{ minWidth: '950px', width: '100%', borderCollapse: 'collapse', fontSize: '0.875rem' }}>
             <thead>
               <tr style={{ backgroundColor: 'var(--bg-tertiary)', color: 'var(--text-secondary)' }}>
-                {['Seq', 'Date', 'Shift', 'Emp No', 'Opn Code', 'Machine', 'Work Order', 'Qty', 'Time', 'Actions'].map(h => (
-                  <th key={h} style={{ padding: '0.75rem', textAlign: 'left', fontWeight: 500 }}>{h}</th>
+                {[
+                  { label: 'Seq', width: '50px' },
+                  { label: 'Date', width: '100px' },
+                  { label: 'Shift', width: '70px' },
+                  { label: 'Emp No', width: '100px' },
+                  { label: 'Opn Code', width: '100px' },
+                  { label: 'Machine', width: '100px' },
+                  { label: 'Work Order', width: '100px' },
+                  { label: 'Qty', width: '80px' },
+                  { label: 'Time', width: '80px' },
+                  { label: 'Actions', width: '170px' }
+                ].map(h => (
+                  <th key={h.label} style={{ padding: '0.75rem', textAlign: 'left', fontWeight: 500, width: h.width }}>{h.label}</th>
                 ))}
               </tr>
             </thead>
