@@ -67,11 +67,10 @@ export default function ReviewPage({ params }) {
           Extracted Data Review
         </div>
         <div style={{ flex: 1, overflowX: 'auto', overflowY: 'auto' }}>
-          <table style={{ minWidth: '950px', width: '100%', borderCollapse: 'collapse', fontSize: '0.875rem' }}>
+          <table style={{ minWidth: '900px', width: '100%', borderCollapse: 'collapse', fontSize: '0.875rem' }}>
             <thead>
               <tr style={{ backgroundColor: 'var(--bg-tertiary)', color: 'var(--text-secondary)' }}>
                 {[
-                  { label: 'Seq', width: '50px' },
                   { label: 'Date', width: '100px' },
                   { label: 'Shift', width: '70px' },
                   { label: 'Emp No', width: '100px' },
@@ -116,9 +115,6 @@ export default function ReviewPage({ params }) {
 
                 return (
                   <tr key={record.id} style={{ borderBottom: '1px solid var(--border-color)', backgroundColor: hasErrors ? 'rgba(239, 68, 68, 0.05)' : 'transparent' }}>
-                    <td style={{ padding: '0.5rem' }}>
-                      <input value={record.sequenceNo || ''} onChange={(e) => handleChange(record.id, 'sequenceNo', e.target.value)} style={inputStyle(conf.sequenceNo, hasErrors)} />
-                    </td>
                     <td style={{ padding: '0.5rem' }}>
                       <input value={record.date || ''} onChange={(e) => handleChange(record.id, 'date', e.target.value)} style={inputStyle(conf.date, hasErrors)} />
                     </td>
