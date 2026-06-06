@@ -77,7 +77,7 @@ graph TB
 
     %% Data Storage
     subgraph Storage [Persistence Layer]
-        SQLite[(SQLite Database: biztel.db)]
+        SQLite[( biztel.db)]
         UploadsFolder[(Local Storage: public/uploads/)]
     end
 
